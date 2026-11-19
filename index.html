@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#030712">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>CRYPTON AI</title>
+<style>
+:root{--bg:#030712;--card:#0b1426;--line:#12304f;--blue:#1e90ff;--green:#00ff9d;--tx:#e6f1ff;--mut:#7f97b5}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(circle at 80% -10%,#0a2a55 0,var(--bg) 55%);color:var(--tx);font-family:system-ui,sans-serif;min-height:100vh;padding-bottom:84px}
+header{padding:calc(14px + env(safe-area-inset-top)) 18px 10px;display:flex;justify-content:space-between;align-items:center}
+h1{font-size:20px;letter-spacing:3px;background:linear-gradient(90deg,var(--blue),var(--green));-webkit-background-clip:text;color:transparent}
+.sub{font-size:12px;color:var(--mut)}
+main{padding:0 14px}
+.tab{display:none}.tab.on{display:block}
+.card{background:linear-gradient(160deg,var(--card),#07101f);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 0 18px #1e90ff14}
+.card h2{font-size:13px;letter-spacing:1.5px;color:var(--green);margin-bottom:10px;text-transform:uppercase}
+.news{padding:10px 0;border-bottom:1px solid var(--line)}.news:last-child{border:0}
+.news a{color:var(--tx);text-decoration:none;font-size:15px;line-height:1.35}
+.meta{font-size:11px;color:var(--mut);margin-top:4px}
+.chips{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto}
+.chip,.btn{border:1px solid var(--blue);background:transparent;color:var(--tx);border-radius:20px;padding:8px 14px;font-size:13px}
+.chip.on,.btn.p{background:linear-gradient(90deg,var(--blue),#00c2a0);border-color:transparent;color:#001018;font-weight:700}
+input,select{background:#050c1a;border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:12px;font-size:15px;width:100%}
+.row{display:flex;gap:8px;margin-bottom:8px}
+.task{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.task .t{flex:1;font-size:15px}.task.done .t{text-decoration:line-through;color:var(--mut)}
+.task button{background:none;border:0;color:var(--mut);font-size:17px;padding:4px}
+.star{color:var(--green)!important}
+.tick{width:22px;height:22px;accent-color:var(--green)}
+#chat{height:calc(100vh - 270px);overflow-y:auto;padding:4px}
+.m{max-width:85%;padding:10px 13px;border-radius:14px;margin:8px 0;font-size:15px;line-height:1.4;white-space:pre-wrap}
+.m.u{margin-left:auto;background:#0d3a6e}.m.a{background:var(--card);border:1px solid var(--line)}
+.bar{display:flex;gap:8px;align-items:center}
+.mic{width:50px;height:50px;border-radius:50%;border:0;font-size:22px;background:linear-gradient(135deg,var(--blue),var(--green));flex:none}
+.mic.rec{animation:p 1s infinite}@keyframes p{50%{box-shadow:0 0 0 12px #00ff9d33}}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#050c1af2;border-top:1px solid var(--line);padding:6px 0 calc(6px + env(safe-area-inset-bottom));backdrop-filter:blur(10px)}
+nav button{flex:1;background:none;border:0;color:var(--mut);font-size:11px;padding:6px}
+nav button span{display:block;font-size:20px}nav button.on{color:var(--green)}
+.empty{color:var(--mut);font-size:14px;padding:6px 0}
+</style>
+</head>
+<body>
+<header><div><h1>CRYPTON AI</h1><div class="sub" id="data"></div></div><button class="chip" id="inst" hidden>Instalar</button></header>
+<main>
+<section class="tab on" id="t-painel">
+ <div class="card"><h2>Assistente CRYPTON</h2><div class="bar"><input id="q0" placeholder="Pergunta algo ao CRYPTON..."><button class="mic" data-mic="q0">🎤</button></div></div>
+ <div class="card"><h2>Tarefas pendentes</h2><div id="p-tar"></div></div>
+ <div class="card"><h2>Últimas notícias</h2><div id="p-not"><div class="empty">A carregar...</div></div></div>
+</section>
+<section class="tab" id="t-noticias">
+ <div class="chips" id="fil"><button class="chip on" data-f="todas">Todas</button><button class="chip" data-f="angola">Angola</button><button class="chip" data-f="mundo">Mundo</button><button class="btn p" id="ref">↻ Atualizar</button></div>
+ <div class="card" id="lista"></div><div class="sub" id="upd"></div>
+</section>
+<section class="tab" id="t-tarefas">
+ <div class="card"><div class="row"><input id="tt" placeholder="Nova tarefa"></div>
+ <div class="row"><input id="th" type="time"><select id="ti"><option value="0">Normal</option><option value="1">Importante</option></select></div>
+ <button class="btn p" id="add" style="width:100%">Adicionar tarefa</button></div>
+ <div class="card"><h2>Pendentes</h2><div id="l-pen"></div></div>
+ <div class="card"><h2>Concluídas</h2><div id="l-con"></div></div>
+ <div class="card"><h2>Lembrete diário</h2><div class="row"><input id="rh" type="time"><button class="btn p" id="rs">Guardar</button></div>
+ <button class="btn" id="nt" style="width:100%">🔔 Ativar notificações</button></div>
+</section>
+<section class="tab" id="t-crypton">
+ <div class="card" style="padding:8px"><div id="chat"></div></div>
+ <div class="bar"><input id="q1" placeholder="Escreve ou fala com o CRYPTON"><button class="mic" data-mic="q1">🎤</button><button class="btn p" id="env">➤</button></div>
+</section>
+</main>
+<nav id="nav">
+<button class="on" data-t="painel"><span>⌂</span>Painel</button><button data-t="noticias"><span>📰</span>Notícias</button>
+<button data-t="tarefas"><span>✓</span>Tarefas</button><button data-t="crypton"><span>◉</span>CRYPTON</button></nav>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+let tasks=ld('c_tasks',[]),prefs=ld('c_prefs',{rem:'08:00'}),hist=ld('c_hist',[]),news=[],fil='todas';
+const fmt=d=>new Date(d).toLocaleString('pt-PT',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+$('#data').textContent=new Date().toLocaleDateString('pt-PT',{weekday:'long',day:'numeric',month:'long'});
+// Navegação
+function go(t){$$('.tab').forEach(e=>e.classList.toggle('on',e.id==='t-'+t));$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t))}
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.t)};
+// Notícias
+async function loadNews(){
+ $('#lista').innerHTML='<div class="empty">A carregar notícias...</div>';
+ try{const r=await fetch('/.netlify/functions/news');if(!r.ok)throw 0;news=(await r.json()).items;sv('c_news',news)}
+ catch{news=ld('c_news',[])}
+ renderNews();$('#upd').textContent='Atualizado às '+new Date().toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'});
+}
+function item(n){return `<div class="news"><a href="${esc(n.link)}" target="_blank" rel="noopener">${n.grave?'🔴 ':''}${esc(n.title)}</a><div class="meta">${esc(n.source)} · ${fmt(n.date)} · ${n.regiao==='angola'?'Angola':'Mundo'}</div></div>`}
+function renderNews(){
+ const l=news.filter(n=>fil==='todas'||n.regiao===fil);
+ $('#lista').innerHTML=l.length?l.map(item).join(''):'<div class="empty">Sem notícias. Verifica a ligação e toca em Atualizar.</div>';
+ $('#p-not').innerHTML=news.length?news.slice(0,4).map(item).join(''):'<div class="empty">Sem notícias disponíveis.</div>';
+}
+$('#fil').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;fil=b.dataset.f;$$('#fil .chip').forEach(c=>c.classList.toggle('on',c===b));renderNews()};
+$('#ref').onclick=loadNews;
+// Tarefas
+function renderTasks(){
+ const row=t=>`<div class="task ${t.done?'done':''}"><input type="checkbox" class="tick" ${t.done?'checked':''} onchange="tog(${t.id})"><div class="t">${esc(t.text)}<div class="meta">${t.time?'⏰ '+t.time:''}</div></div><button class="${t.imp?'star':''}" onclick="imp(${t.id})">★</button><button onclick="ed(${t.id})">✎</button><button onclick="del(${t.id})">🗑</button></div>`;
+ const p=tasks.filter(t=>!t.done),c=tasks.filter(t=>t.done);
+ $('#l-pen').innerHTML=p.map(row).join('')||'<div class="empty">Nada pendente.</div>';
+ $('#l-con').innerHTML=c.map(row).join('')||'<div class="empty">Nenhuma concluída.</div>';
+ $('#p-tar').innerHTML=p.slice(0,5).map(t=>`<div class="task"><div class="t">${t.imp?'★ ':''}${esc(t.text)} <span class="meta">${t.time||''}</span></div></div>`).join('')||'<div class="empty">Sem tarefas pendentes.</div>';
+ sv('c_tasks',tasks);
+}
+const gt=id=>tasks.find(t=>t.id===id);
+window.tog=id=>{gt(id).done=!gt(id).done;renderTasks()};
+window.imp=id=>{gt(id).imp=!gt(id).imp;renderTasks()};
+window.del=id=>{if(confirm('Eliminar esta tarefa?')){tasks=tasks.filter(t=>t.id!==id);renderTasks()}};
+window.ed=id=>{const t=gt(id),n=prompt('Editar tarefa:',t.text);if(n&&n.trim()){t.text=n.trim();renderTasks()}};
+$('#add').onclick=()=>{const x=$('#tt').value.trim();if(!x)return;tasks.unshift({id:Date.now(),text:x,time:$('#th').value,imp:$('#ti').value==='1',done:false,notified:''});$('#tt').value='';renderTasks()};
+$('#rh').value=prefs.rem;
+$('#rs').onclick=()=>{prefs.rem=$('#rh').value;sv('c_prefs',prefs);alert('Lembrete diário guardado.')};
+$('#nt').onclick=async()=>{if(!('Notification' in window))return alert('Este navegador não suporta notificações.');const r=await Notification.requestPermission();alert(r==='granted'?'Notificações ativadas.':'Notificações não permitidas.')};
+async function notify(t,b){if(!('Notification' in window)||Notification.permission!=='granted')return;const r=await navigator.serviceWorker?.getRegistration();r?r.showNotification(t,{body:b,icon:'icon-192.png',badge:'icon-192.png'}):new Notification(t,{body:b})}
+setInterval(()=>{ // verifica a cada 30s (com a app aberta)
+ const d=new Date(),hm=d.toTimeString().slice(0,5),day=d.toDateString();
+ tasks.forEach(t=>{if(!t.done&&t.time===hm&&t.notified!==day){t.notified=day;sv('c_tasks',tasks);notify(t.imp?'⚠ Tarefa importante':'Tarefa',t.text)}});
+ if(prefs.rem===hm&&prefs.last!==day){prefs.last=day;sv('c_prefs',prefs);const n=tasks.filter(t=>!t.done).length;notify('CRYPTON AI','Tens '+n+' tarefa(s) pendente(s) hoje.')}
+},30000);
+// Assistente
+function bub(c,t){const d=document.createElement('div');d.className='m '+c;d.textContent=t;$('#chat').append(d);$('#chat').scrollTop=1e9;return d}
+function local(q){q=q.toLowerCase();const p=tasks.filter(t=>!t.done);
+ if(/hora/.test(q))return 'São '+new Date().toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})+'.';
+ if(/tarefa|dia|plano/.test(q))return p.length?'Tens '+p.length+' tarefa(s): '+p.map(t=>t.text).join('; ')+'.':'Não tens tarefas pendentes.';
+ return 'Estou sem ligação ao serviço de IA. Verifica a configuração da chave no Netlify.'}
+async function ask(q){
+ q=q.trim();if(!q)return;go('crypton');bub('u',q);hist.push({role:'user',content:q});
+ const w=bub('a','...');let rep;
+ try{const r=await fetch('/.netlify/functions/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:hist.slice(-12),ctx:{agora:new Date().toLocaleString('pt-PT'),tarefas:tasks.filter(t=>!t.done).map(t=>({texto:t.text,hora:t.time,importante:t.imp}))}})});
+  const j=await r.json();if(!r.ok)throw 0;rep=j.reply}catch{rep=local(q)}
+ w.textContent=rep;hist.push({role:'assistant',content:rep});hist=hist.slice(-20);sv('c_hist',hist);speak(rep);
+}
+function speak(t){if(!('speechSynthesis' in window)||!ld('c_voz',true))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='pt-PT';speechSynthesis.speak(u)}
+$('#env').onclick=()=>{const v=$('#q1').value;$('#q1').value='';ask(v)};
+$('#q1').onkeydown=e=>{if(e.key==='Enter')$('#env').click()};
+$('#q0').onkeydown=e=>{if(e.key==='Enter'){const v=$('#q0').value;$('#q0').value='';ask(v)}};
+$$('.mic').forEach(b=>b.onclick=()=>{
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return alert('Reconhecimento de voz não suportado neste navegador. Usa o Chrome.');
+ const r=new SR();r.lang='pt-PT';b.classList.add('rec');
+ r.onresult=e=>{const v=e.results[0][0].transcript;$('#'+b.dataset.mic).value='';ask(v)};
+ r.onend=()=>b.classList.remove('rec');r.onerror=()=>b.classList.remove('rec');r.start()});
+hist.slice(-10).forEach(m=>bub(m.role==='user'?'u':'a',m.content));
+if(!hist.length)bub('a','Olá, sou o CRYPTON. Posso ajudar-te a organizar o dia, planear actividades e responder a perguntas. Escreve ou toca no microfone.');
+// PWA
+let dp;addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;$('#inst').hidden=false});
+$('#inst').onclick=async()=>{if(dp){dp.prompt();dp=null;$('#inst').hidden=true}};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+renderTasks();loadNews();
+</script>
+</body>
+</html>
